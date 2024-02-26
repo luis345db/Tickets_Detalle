@@ -20,4 +20,8 @@
     <ProjectReference Include="..\TicketsDetalle_WebAssembly\TicketsDetalle_WebAssembly.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
 </Project>
