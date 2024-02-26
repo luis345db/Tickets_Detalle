@@ -1,5 +1,6 @@
 ﻿@page "/Create"
 @inject HttpClient httpClient
+@using System.Xml.Linq
 @using TicketsDetalle_WebAssembly.Models
 
 <EditForm Model="tickets" OnValidSubmit="Guardar">
@@ -23,9 +24,9 @@
             </div>
             <div class="row">
                 <div class="col-6">
-                    <label class="fw-bold">ClienteID:</label>
-                    <InputNumber @bind-Value="tickets.TicketId" class="form-control"></InputNumber>
-                    <ValidationMessage For="@(() => tickets.TicketId)" />
+                    <label class="fw-bold">Asunto:</label>
+                    <InputText @bind-Value="tickets.Asunto" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => tickets.Asunto)" />
                 </div>
                 <div class="col-6">
                     <label class="fw-bold">SolicitadoPor:</label>
@@ -34,19 +35,19 @@
                 </div>
             </div>
             <div>
-                <label class="fw-bold">Asunto:</label>
-                <InputText @bind-Value="tickets.Asunto" class="form-control"></InputText>
-                <ValidationMessage For="@(() => tickets.Asunto)" />
-            </div>
-            <div>
                 <label class="fw-bold">Descripci&oacute;n:</label>
                 <InputTextArea @bind-Value="tickets.Descripcion" class="form-control"></InputTextArea>
                 <ValidationMessage For="@(() => tickets.Descripcion)" />
             </div>
         </div>
-        <div class="card-footer d-flex justify-content-center">
-            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo </button>
-            <button class="btn btn-success bi bi-">Guardar </button>
+        <div class="card-footer ">
+
+            <div class="d-flex">
+                <a href="/Index" type="button" class="btn btn-secondary bi bi-arrow-left-square-fill" @onclick="Nuevo">Volver atr&aacute;s </a>
+                <button type="button" class="btn btn-primary bi bi-file-earmark-plus-fill" @onclick="Nuevo">Nuevo </button>
+                <button class="btn btn-success bi-floppy-fill">Guardar </button>
+            </div>
+
         </div>
     </div>
 
@@ -64,7 +65,7 @@
             <ValidationMessage For="@(() => Detalles.Mensaje)" />
         </div>
         <div class="card-footer d-flex justify-content-center">
-            <button type="button" class="btn btn-outline-success">Agregar</button>
+            <button type="button" @onclick="AgregarDetalle" class="btn btn-outline-success">Agregar</button>
         </div>
         <table class='table table-bordered table-hover'>
             <thead>
@@ -76,12 +77,22 @@
                 </tr>
             </thead>
             <tbody>
-               
+                @foreach (var detalle in listaDetalles)
+                {
+                    var ticketEncontrado = BuscarTicket(detalle.TicketId);
+                    <tr>
+                        <td>@detalle.TicketId</td>
+                        <td>@detalle.Emisor</td>
+                        <td>@detalle.Mensaje</td>
+                        <td><button type="button" class="btn btn-danger bi bi-trash-fill" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
 
 </EditForm>
+
 
 @code {
     [Parameter]
@@ -89,24 +100,31 @@
     public int TicketId { get; set; }
 
     public Tickets tickets { get; set; } = new Tickets();
-    public ICollection<Tickets_Detalle> TicketsDetalle { get; set; } = new List<Tickets_Detalle>();
-    public Tickets_Detalle Detalles { get; set; } = new Tickets_Detalle();
 
+
+
+    public Tickets_Detalle Detalles { get; set; } = new Tickets_Detalle();
+    public List<Tickets_Detalle> listaDetalles = new List<Tickets_Detalle>();
     public bool mensajeVacio;
     public bool emisorVacio;
 
     protected override async Task OnInitializedAsync()
     {
-        if (TicketId > 0)
-        {
-            this.tickets.TicketId = TicketId;
-            await Buscar();
-        }
+        // if (TicketId > 0)
+        // {
+        //     this.tickets.TicketId = TicketId;
+        //     await Buscar();
+        // }
+
+
+
+
     }
 
     private async Task<Tickets> BuscarTicket(int ticketId)
     {
         Tickets tickets = new Tickets();
+        Tickets_Detalle ticketDetalles = new Tickets_Detalle();
         var ticketEncontrado = await httpClient.GetFromJsonAsync<Tickets>($"api/Tickets/{ticketId}");
         if (ticketEncontrado != null)
             return tickets = ticketEncontrado;
@@ -135,7 +153,7 @@
 
     public async Task Guardar()
     {
-        using var response = await httpClient.PostAsJsonAsync("api/Tickets", tickets);
+        var response = await httpClient.PostAsJsonAsync("api/Tickets", tickets);
         if (!response.IsSuccessStatusCode)
         {
             return;
@@ -144,20 +162,24 @@
         if (ticketDevuelto is not null)
         {
             tickets = ticketDevuelto;
+            Detalles.TicketId = tickets.TicketId;
+
             StateHasChanged();
-            this.Nuevo();
+            // this.Nuevo();
         }
     }
 
     public void Nuevo()
     {
-        this.tickets = new Tickets();
-        this.Detalles = new Tickets_Detalle();
+        tickets = new Tickets();
+        Detalles = new Tickets_Detalle();
+        listaDetalles = new List<Tickets_Detalle>();
+
     }
 
     public async Task Eliminar()
     {
-        using var response = await httpClient.DeleteAsync($"api/Tickets/{tickets.TicketId}");
+        var response = await httpClient.DeleteAsync($"api/Tickets/{tickets.TicketId}");
         if (!response.IsSuccessStatusCode)
         {
             return;
@@ -171,4 +193,39 @@
         emisorVacio = string.IsNullOrEmpty(Detalles.Emisor);
         return mensajeVacio || emisorVacio || Detalles.Emisor!.Any(Char.IsDigit);
     }
+
+    public async Task AgregarDetalle()
+    {
+
+
+        var response = await httpClient.PostAsJsonAsync("api/TicketsDetalles", Detalles);
+        if (!response.IsSuccessStatusCode)
+        {
+            return;
+        }
+        var ticketDevuelto = await response.Content.ReadFromJsonAsync<Tickets_Detalle>();
+        if (ticketDevuelto is not null)
+        {
+            Detalles.TicketId = tickets.TicketId;
+            Detalles = ticketDevuelto;
+            listaDetalles.Add(Detalles);
+
+            var ticketIdGuardado = Detalles.TicketId;
+
+            Detalles = new Tickets_Detalle();
+            Detalles.TicketId = ticketIdGuardado;
+            StateHasChanged();
+
+
+        }
+    }
+
+    public async Task RemoverDetalle(Tickets_Detalle details)
+    {
+
+       
+        Detalles = details;
+        listaDetalles.Remove(details);
+    }
+}
 }
