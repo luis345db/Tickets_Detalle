@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketsDetalle_WebAssembly", "TicketsDetalle_WebAssembly.csproj", "{8CA6FB65-2380-44F1-BE4C-6FAA20B269CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketsDetalle_WebAssembly", "TicketsDetalle_WebAssembly.csproj", "{8CA6FB65-2380-44F1-BE4C-6FAA20B269CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tickets_DetalleWebAssembly.Api", "..\Tickets_DetalleWebAssembly.Api\Tickets_DetalleWebAssembly.Api.csproj", "{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tickets_DetalleWebAssembly.Api", "..\Tickets_DetalleWebAssembly.Api\Tickets_DetalleWebAssembly.Api.csproj", "{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
