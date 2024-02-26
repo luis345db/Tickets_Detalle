@@ -1,0 +1,174 @@
+﻿@page "/Create"
+@inject HttpClient httpClient
+@using TicketsDetalle_WebAssembly.Models
+
+<EditForm Model="tickets" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header">
+            <h1>Registro Ticket</h1>
+        </div>
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-6">
+                    <label class="fw-bold">TicketID:</label>
+                    <InputNumber @bind-Value="tickets.TicketId" class="form-control"></InputNumber>
+                </div>
+                <div class="col-6">
+                    <label class="fw-bold">Fecha:</label>
+                    <InputDate @bind-Value="tickets.Fecha" class="form-control mb-3"></InputDate>
+                    <ValidationMessage For="@(() => tickets.Fecha)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label class="fw-bold">ClienteID:</label>
+                    <InputNumber @bind-Value="tickets.TicketId" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => tickets.TicketId)" />
+                </div>
+                <div class="col-6">
+                    <label class="fw-bold">SolicitadoPor:</label>
+                    <InputText @bind-Value="tickets.SolicitadoPor" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => tickets.SolicitadoPor)" />
+                </div>
+            </div>
+            <div>
+                <label class="fw-bold">Asunto:</label>
+                <InputText @bind-Value="tickets.Asunto" class="form-control"></InputText>
+                <ValidationMessage For="@(() => tickets.Asunto)" />
+            </div>
+            <div>
+                <label class="fw-bold">Descripci&oacute;n:</label>
+                <InputTextArea @bind-Value="tickets.Descripcion" class="form-control"></InputTextArea>
+                <ValidationMessage For="@(() => tickets.Descripcion)" />
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo </button>
+            <button class="btn btn-success bi bi-">Guardar </button>
+        </div>
+    </div>
+
+    @*Detalles:*@
+    <div class="card card-header mt-5">
+        <h3>Detalle del ticket</h3>
+        <div>
+            <label class="fw-bold mt-3"> Nombre</label>
+            <InputText @bind-Value="Detalles.Emisor" class="form-control" placeholder="Enel R. Almonte."></InputText>
+            <ValidationMessage For="@(() => Detalles.Emisor)" />
+        </div>
+        <div>
+            <label class="fw-bold mt-3">Mensaje</label>
+            <InputTextArea @bind-Value="Detalles.Mensaje" class="form-control" placeholder="Agregue un mensaje."></InputTextArea>
+            <ValidationMessage For="@(() => Detalles.Mensaje)" />
+        </div>
+        <div class="card-footer d-flex justify-content-center">
+            <button type="button" class="btn btn-outline-success">Agregar</button>
+        </div>
+        <table class='table table-bordered table-hover'>
+            <thead>
+                <tr>
+                    <th>TicketId</th>
+                    <th>Emisor</th>
+                    <th>Mensaje</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+               
+            </tbody>
+        </table>
+    </div>
+
+</EditForm>
+
+@code {
+    [Parameter]
+
+    public int TicketId { get; set; }
+
+    public Tickets tickets { get; set; } = new Tickets();
+    public ICollection<Tickets_Detalle> TicketsDetalle { get; set; } = new List<Tickets_Detalle>();
+    public Tickets_Detalle Detalles { get; set; } = new Tickets_Detalle();
+
+    public bool mensajeVacio;
+    public bool emisorVacio;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (TicketId > 0)
+        {
+            this.tickets.TicketId = TicketId;
+            await Buscar();
+        }
+    }
+
+    private async Task<Tickets> BuscarTicket(int ticketId)
+    {
+        Tickets tickets = new Tickets();
+        var ticketEncontrado = await httpClient.GetFromJsonAsync<Tickets>($"api/Tickets/{ticketId}");
+        if (ticketEncontrado != null)
+            return tickets = ticketEncontrado;
+        return new Tickets();
+    }
+
+    public async Task Buscar()
+    {
+        var ticketIdEncontrado = (await httpClient.GetFromJsonAsync<List<Tickets>>($"api/Tickets"))!
+        .ToList()
+        .Any(t => t.TicketId == tickets.TicketId);
+        if (ticketIdEncontrado)
+        {
+            var ticketEncontrado = await httpClient.GetFromJsonAsync<Tickets>($"api/Tickets/{tickets.TicketId}");
+            if (ticketEncontrado != null)
+            {
+                this.tickets = ticketEncontrado;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/Tickets", tickets);
+        if (!response.IsSuccessStatusCode)
+        {
+            return;
+        }
+        var ticketDevuelto = await response.Content.ReadFromJsonAsync<Tickets>();
+        if (ticketDevuelto is not null)
+        {
+            tickets = ticketDevuelto;
+            StateHasChanged();
+            this.Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.tickets = new Tickets();
+        this.Detalles = new Tickets_Detalle();
+    }
+
+    public async Task Eliminar()
+    {
+        using var response = await httpClient.DeleteAsync($"api/Tickets/{tickets.TicketId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            return;
+        }
+        Nuevo();
+    }
+
+    public bool Validar()
+    {
+        mensajeVacio = string.IsNullOrEmpty(Detalles.Mensaje);
+        emisorVacio = string.IsNullOrEmpty(Detalles.Emisor);
+        return mensajeVacio || emisorVacio || Detalles.Emisor!.Any(Char.IsDigit);
+    }
+}
