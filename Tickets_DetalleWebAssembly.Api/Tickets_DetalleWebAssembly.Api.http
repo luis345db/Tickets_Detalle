@@ -1,0 +1,6 @@
+@Tickets_DetalleWebAssembly.Api_HostAddress = http://localhost:5049
+
+GET {{Tickets_DetalleWebAssembly.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

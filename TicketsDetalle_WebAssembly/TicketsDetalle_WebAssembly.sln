@@ -5,6 +5,8 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketsDetalle_WebAssembly", "TicketsDetalle_WebAssembly.csproj", "{8CA6FB65-2380-44F1-BE4C-6FAA20B269CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tickets_DetalleWebAssembly.Api", "..\Tickets_DetalleWebAssembly.Api\Tickets_DetalleWebAssembly.Api.csproj", "{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8CA6FB65-2380-44F1-BE4C-6FAA20B269CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CA6FB65-2380-44F1-BE4C-6FAA20B269CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CA6FB65-2380-44F1-BE4C-6FAA20B269CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08BFC416-8607-4B40-A9F4-11FC6FD3B63D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
